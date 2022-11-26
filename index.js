@@ -19,7 +19,13 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run() {
     try {
-       
+        const categoriesCollection = client.db('bikehub').collection('categories')
+
+        app.get('/categories', async (req, res) => {
+            const query = {};
+            const categories= await categoriesCollection.find(query).toArray();
+            res.send(categories)
+        })
 
     }
     finally {
