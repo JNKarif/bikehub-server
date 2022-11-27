@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 const port = process.env.PORT || 5000;
@@ -14,7 +15,7 @@ app.use(express.json());
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.ei4prfy.mongodb.net/?retryWrites=true&w=majority`;
-console.log(uri)
+// console.log(uri)
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 async function run() {
@@ -26,7 +27,7 @@ async function run() {
 
         app.get('/categories', async (req, res) => {
             const query = {};
-            const categories= await categoriesCollection.find(query).toArray();
+            const categories = await categoriesCollection.find(query).toArray();
             res.send(categories)
         })
 
@@ -38,25 +39,38 @@ async function run() {
         });
 
 
+        app.get('/jwt', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            if (user) {
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '3d' })
+                return res.send({ accessToken: token })
+            }
+            console.log(user);
+            res.status(403).send({ accessToken: 'Forbidden Access' })
+        })
+
+
         // my orders api reading
-        app.get('/bookings', async(req,res)=>{
-            const email =req.query.email;
-            const query = {buyerEmail: email};
-            const bookings= await bookingsCollection.find(query).toArray();
+        app.get('/bookings', async (req, res) => {
+            const email = req.query.email;
+            const query = { buyerEmail: email };
+            const bookings = await bookingsCollection.find(query).toArray();
             res.send(bookings)
         })
 
-        
+
         // my orders api creating
-        app.post('/bookings', async(req,res)=>{
-            const booking =req.body
+        app.post('/bookings', async (req, res) => {
+            const booking = req.body
             // console.log(booking)
             const result = await bookingsCollection.insertOne(booking);
             res.send(result)
         })
 
         // users data storing in db
-        app.post('/users', async(req, res)=>{
+        app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
             res.send(result)
