@@ -22,6 +22,7 @@ async function run() {
         const categoriesCollection = client.db('bikehub').collection('categories')
         const productsCollection = client.db('bikehub').collection('products')
         const bookingsCollection = client.db('bikehub').collection('bookings')
+        const usersCollection = client.db('bikehub').collection('users')
 
         app.get('/categories', async (req, res) => {
             const query = {};
@@ -36,6 +37,8 @@ async function run() {
             res.send(category)
         });
 
+
+        // my orders api reading
         app.get('/bookings', async(req,res)=>{
             const email =req.query.email;
             const query = {buyerEmail: email};
@@ -43,10 +46,19 @@ async function run() {
             res.send(bookings)
         })
 
+        
+        // my orders api creating
         app.post('/bookings', async(req,res)=>{
             const booking =req.body
             // console.log(booking)
             const result = await bookingsCollection.insertOne(booking);
+            res.send(result)
+        })
+
+        // users data storing in db
+        app.post('/users', async(req, res)=>{
+            const user = req.body;
+            const result = await usersCollection.insertOne(user);
             res.send(result)
         })
 
