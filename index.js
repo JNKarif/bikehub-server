@@ -42,6 +42,7 @@ async function run() {
         const productsCollection = client.db('bikehub').collection('products')
         const bookingsCollection = client.db('bikehub').collection('bookings')
         const usersCollection = client.db('bikehub').collection('users')
+        // const sellersCollection = client.db('bikehub').collection('sellers')
 
         app.get('/categories', async (req, res) => {
             const query = {};
@@ -62,8 +63,8 @@ async function run() {
             const query = { email: email };
             const user = await usersCollection.findOne(query);
             if (user) {
-                // const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '3d' })
-                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN)
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '3d' })
+                // const token = jwt.sign({ email }, process.env.ACCESS_TOKEN)
                 return res.send({ accessToken: token })
             }
             console.log(user);
@@ -134,6 +135,31 @@ async function run() {
             const updatedDoc = {
                 $set: {
                     role: 'admin'
+                }
+
+            }
+            const result = await usersCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        })
+
+        
+
+        // creating seller
+        app.put('/users/seller/:id', verifyJWT, async (req, res) => {
+            const decodedEmail = req.decoded.email;
+            const query = { email: decodedEmail };
+            const user = await usersCollection.findOne(query);
+
+            if (user?.role !== 'seller') {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
+
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    role: 'seller'
                 }
 
             }
