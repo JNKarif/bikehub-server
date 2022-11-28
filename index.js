@@ -25,7 +25,14 @@ function verifyJWT(req, res, next) {
         return res.status(401).send('unauthorised access')
     }
 
-    const token = authHeader.split(' ')[1]
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+        if (err) {
+            return res.status(403).send({ message: 'forbidden accesss' })
+        }
+        req.decoded = decoded;
+        next()
+    })
 }
 
 
@@ -55,7 +62,8 @@ async function run() {
             const query = { email: email };
             const user = await usersCollection.findOne(query);
             if (user) {
-                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '3d' })
+                // const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '3d' })
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN)
                 return res.send({ accessToken: token })
             }
             console.log(user);
@@ -66,6 +74,11 @@ async function run() {
         // my orders api reading
         app.get('/bookings', verifyJWT, async (req, res) => {
             const email = req.query.email;
+            const decodedEmail = req.decoded.email;
+
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'forbidden accesss' })
+            }
 
             const query = { email: email };
             const bookings = await bookingsCollection.find(query).toArray();
@@ -79,6 +92,13 @@ async function run() {
             // console.log(booking)
             const result = await bookingsCollection.insertOne(booking);
             res.send(result)
+        })
+
+
+        app.get('/users', async(req,res)=>{
+            const query ={};
+            const users= await usersCollection.find(query).toArray();
+            res.send(users)
         })
 
         // users data storing in db
