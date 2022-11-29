@@ -42,8 +42,9 @@ async function run() {
         const productsCollection = client.db('bikehub').collection('products')
         const bookingsCollection = client.db('bikehub').collection('bookings')
         const usersCollection = client.db('bikehub').collection('users')
-        const sellersCollection = client.db('bikehub').collection('sellers')
-        const buyersCollection = client.db('bikehub').collection('buyers')
+        const newProductsCollection= client.db('bikehub').collection('newProducts')
+        // const sellersCollection = client.db('bikehub').collection('sellers')
+        // const buyersCollection = client.db('bikehub').collection('buyers')
 
         app.get('/categories', async (req, res) => {
             const query = {};
@@ -57,6 +58,9 @@ async function run() {
             const category = await productsCollection.find(query).toArray();
             res.send(category)
         });
+
+
+        
 
 
         app.get('/jwt', async (req, res) => {
@@ -155,10 +159,18 @@ async function run() {
 
 
         // seller reading
+        // app.get('/users/seller/:email', async (req, res) => {
+        //     const email = req.params.email;
+        //     const query = { email };
+        //     const user = await usersCollection.find(query).toArray();
+        //     console.log(user)
+        //     res.send({ isSeller: user?.role === 'seller' })
+        // })
         app.get('/users/seller/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email };
-            const user = await usersCollection.find(query).toArray();
+            const user = await usersCollection.findOne(query);
+            console.log(user)
             res.send({ isSeller: user?.role === 'seller' })
         })
 
@@ -201,6 +213,31 @@ async function run() {
         //     const result = await usersCollection.updateOne(filter, updatedDoc, options);
         //     res.send(result);
         // })
+
+
+
+
+        // product category name for seller to add product
+        app.get('/productsCategory', async(req, res)=>{
+            const query= {};
+            const result = await categoriesCollection.find(query).project({cateogoryName:1}).toArray()
+        res.send(result)
+        })
+
+        // adding new product by seller
+        app.post('/products', async(req, res)=>{
+            const product = req.body;
+            const result= await newProductsCollection.insertOne(product);
+            res.send(result)
+        })
+
+        // all new product reading by get
+        app.get('/products', async(req, res)=>{
+            const query= {};
+            const products = await newProductsCollection.find(query).toArray();
+            res.send(products)
+            
+        })
 
     }
     finally {
