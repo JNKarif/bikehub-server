@@ -42,7 +42,8 @@ async function run() {
         const productsCollection = client.db('bikehub').collection('products')
         const bookingsCollection = client.db('bikehub').collection('bookings')
         const usersCollection = client.db('bikehub').collection('users')
-        // const sellersCollection = client.db('bikehub').collection('sellers')
+        const sellersCollection = client.db('bikehub').collection('sellers')
+        const buyersCollection = client.db('bikehub').collection('buyers')
 
         app.get('/categories', async (req, res) => {
             const query = {};
@@ -142,30 +143,64 @@ async function run() {
             res.send(result);
         })
 
-        
 
-        // creating seller
-        app.put('/users/seller/:id', verifyJWT, async (req, res) => {
-            const decodedEmail = req.decoded.email;
-            const query = { email: decodedEmail };
-            const user = await usersCollection.findOne(query);
+// no need***********
+        // app.get('/users/seller', async (req, res) => {
+        //     const role = req.params.role;
+        //     const query = { role };
+        //     const sellers = await usersCollection.find(query).toArray()
+        //     res.send({isSeller:sellers?.role==='seller'})
+        // })
 
-            if (user?.role !== 'seller') {
-                return res.status(403).send({ message: 'forbidden access' })
-            }
 
-            const id = req.params.id;
-            const filter = { _id: ObjectId(id) };
-            const options = { upsert: true };
-            const updatedDoc = {
-                $set: {
-                    role: 'seller'
-                }
 
-            }
-            const result = await usersCollection.updateOne(filter, updatedDoc, options);
-            res.send(result);
+        // seller reading
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email };
+            const user = await usersCollection.find(query).toArray();
+            res.send({ isSeller: user?.role === 'seller' })
         })
+
+
+
+        app.get('/users/:role', async (req, res) => {
+            const role = req.params.role;
+            const query = { role };
+            const userRole = await usersCollection.find(query).toArray();
+            res.send(userRole)
+        })
+
+
+
+
+
+
+
+
+        // no need***********
+        // creating seller
+        // app.put('/users/seller/:id', verifyJWT, async (req, res) => {
+        //     const decodedEmail = req.decoded.email;
+        //     const query = { email: decodedEmail };
+        //     const user = await usersCollection.findOne(query);
+
+        //     if (user?.role !== 'seller') {
+        //         return res.status(403).send({ message: 'forbidden access' })
+        //     }
+
+        //     const id = req.params.id;
+        //     const filter = { _id: ObjectId(id) };
+        //     const options = { upsert: true };
+        //     const updatedDoc = {
+        //         $set: {
+        //             role: 'seller'
+        //         }
+
+        //     }
+        //     const result = await usersCollection.updateOne(filter, updatedDoc, options);
+        //     res.send(result);
+        // })
 
     }
     finally {
