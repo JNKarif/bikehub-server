@@ -177,7 +177,7 @@ async function run() {
 
         // need to add verifyJWT letter ##########
         // app.get('/users/seller',verifyJWT, async (req, res) => {
-        app.get('/users/seller/:email', async (req, res) => {
+        app.get('/users/seller', async (req, res) => {
 
             const email = req.query.email;
             // const decodedEmail = req.decoded.email;
@@ -193,7 +193,9 @@ async function run() {
         })
 
 
-        app.get('/users/buyer/:email', async (req, res) => {
+       
+
+        app.get('/users/buyer', async (req, res) => {
 
             const email = req.query.email;
             // const decodedEmail = req.decoded.email;
@@ -201,7 +203,7 @@ async function run() {
             // if (email !== decodedEmail) {
             //     return res.status(403).send({ message: 'forbidden accesss' })
             // }
-
+            console.log(email)
             const query = { email: email };
             const user = await usersCollection.findOne(query);
             console.log(user)
@@ -209,19 +211,28 @@ async function run() {
         })
 
 
-        app.get('/users/:role', async (req, res) => {
+        app.get('/users/seller/:role', async (req, res) => {
             const role = req.params.role;
             const query = { role: role };
             const userRole = await usersCollection.find(query).toArray();
             res.send(userRole)
         })
 
-
-        app.get('/users/seller', async (res, req) => {
-            const query = {}
-            const result = await usersCollection.find(query).toArray()
-            res.send(result)
+        app.get('/users/buyer/:role', async (req, res) => {
+            const role = req.params.role;
+            const query = { role: role };
+            const userRole = await usersCollection.find(query).toArray();
+            res.send(userRole)
         })
+
+        // mo need
+        // app.get('/users/seller', async (res, req) => {
+        //     const query = {}
+        //     const result = await usersCollection.find(query).toArray()
+        //     res.send(result)
+        // })
+
+
 
         // delete seller by admin
         app.delete('/users/seller/:id', async (req, res) => {
@@ -231,8 +242,8 @@ async function run() {
             const result = await usersCollection.deleteOne(filter)
             res.send(result)
         })
-       
-    //    delete buyer by admin
+
+        //    delete buyer by admin
         app.delete('/users/buyer/:id', async (req, res) => {
             const id = req.params.id;
             console.log(id)
