@@ -111,6 +111,38 @@ async function run() {
             res.send(result)
         })
 
+
+        // ##### verifyJWT add krte hobey
+        // all new product reading by get
+        app.get('/products', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const products = await newProductsCollection.find(query).toArray();
+            console.log(products)
+            res.send(products)
+
+        })
+
+        // product category name for seller to add product
+        app.get('/productsCategory', async (req, res) => {
+            const query = {};
+            const result = await categoriesCollection.find(query).project({ cateogoryName: 1 }).toArray()
+            res.send(result)
+        })
+
+
+        // ##### verifyJWT add krte hobey
+        // adding new product by seller
+        app.post('/products', async (req, res) => {
+            const product = req.body;
+            const result = await newProductsCollection.insertOne(product);
+            console.log(result)
+            res.send(result)
+        })
+
+
+
+
         // reading all ussers in the browser
         app.get('/users', async (req, res) => {
             const query = {};
@@ -193,7 +225,7 @@ async function run() {
         })
 
 
-       
+
 
         app.get('/users/buyer', async (req, res) => {
 
@@ -267,30 +299,7 @@ async function run() {
 
 
 
-        // product category name for seller to add product
-        app.get('/productsCategory', async (req, res) => {
-            const query = {};
-            const result = await categoriesCollection.find(query).project({ cateogoryName: 1 }).toArray()
-            res.send(result)
-        })
 
-
-        // ##### verifyJWT add krte hobey
-        // adding new product by seller
-        app.post('/products', async (req, res) => {
-            const product = req.body;
-            const result = await newProductsCollection.insertOne(product);
-            res.send(result)
-        })
-
-        // ##### verifyJWT add krte hobey
-        // all new product reading by get
-        app.get('/products', async (req, res) => {
-            const query = {};
-            const products = await newProductsCollection.find(query).toArray();
-            res.send(products)
-
-        })
 
     }
     finally {
